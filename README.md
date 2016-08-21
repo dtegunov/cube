@@ -1,12 +1,12 @@
 ![Cube screenshot](https://raw.githubusercontent.com/dtegunov/cube/master/github.png)
 
-#Cube – making sub-tomogram picking suck no more than necessary.
+#Cube – making sub-tomogram picking suck slightly less.
 
 ## You will need
 - [Precompiled binaries](https://github.com/dtegunov/cube/raw/master/Precompiled/Precompiled.zip) (compiling the code yourself will likely fail because I don't synchronize updates for all dependencies)
 - Windows PC with a GPU that supports OpenGL 4.4, the latest drivers and [.NET Framework 4.6](https://www.microsoft.com/en-us/download/details.aspx?id=48130) installed.
 - Tomographic volume in MRC format.
-- Optionally, particle coordinates either as a text file (XYZ columns), or a STAR file using Relion's column names (i. e. rlnCoordinateX etc.).
+- Optionally, particle coordinates either as a tab-delimited text file (XYZ columns), or a STAR file using Relion's column names (i. e. rlnCoordinateX etc.).
 
 
 ## Controls
