@@ -177,6 +177,41 @@ namespace Cube
             set { if (value != _MouseZ) { _MouseZ = value; OnPropertyChanged(); } }
         }
 
+        private Particle _ActiveParticle = null;
+        public Particle ActiveParticle
+        {
+            get { return _ActiveParticle; }
+            set
+            {
+                if (value != _ActiveParticle)
+                {
+                    if (_ActiveParticle != null)
+                        _ActiveParticle.IsSelected = false;
+
+                    _ActiveParticle = value;
+
+                    if (_ActiveParticle != null)
+                        _ActiveParticle.IsSelected = true;
+
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private bool _CentralBlob = true;
+        public bool CentralBlob
+        {
+            get { return _CentralBlob; }
+            set { if (value != _CentralBlob) { _CentralBlob = value; OnPropertyChanged(); } }
+        }
+
+        private decimal _IsosurfaceThreshold = 1.5M;
+        public decimal IsosurfaceThreshold
+        {
+            get { return _IsosurfaceThreshold; }
+            set { if (value != _IsosurfaceThreshold) { _IsosurfaceThreshold = value; OnPropertyChanged(); } }
+        }
+
         public void Save(string path)
         {
             XmlTextWriter Writer = new XmlTextWriter(File.Create(path), Encoding.Unicode);
@@ -191,6 +226,8 @@ namespace Cube
             XMLHelper.WriteParamNode(Writer, "DisplayIntensityMin", DisplayIntensityMin);
             XMLHelper.WriteParamNode(Writer, "DisplayIntensityMax", DisplayIntensityMax);
             XMLHelper.WriteParamNode(Writer, "BoxSize", BoxSize);
+            XMLHelper.WriteParamNode(Writer, "CentralBlob", CentralBlob);
+            XMLHelper.WriteParamNode(Writer, "IsosurfaceThreshold", IsosurfaceThreshold);
 
             Writer.WriteEndElement();
             Writer.WriteEndDocument();
@@ -211,6 +248,8 @@ namespace Cube
                 DisplayIntensityMin = XMLHelper.LoadParamNode(Reader, "DisplayIntensityMin", DisplayIntensityMin);
                 DisplayIntensityMax = XMLHelper.LoadParamNode(Reader, "DisplayIntensityMax", DisplayIntensityMax);
                 BoxSize = XMLHelper.LoadParamNode(Reader, "BoxSize", BoxSize);
+                CentralBlob = XMLHelper.LoadParamNode(Reader, "CentralBlob", CentralBlob);
+                IsosurfaceThreshold = XMLHelper.LoadParamNode(Reader, "IsosurfaceThreshold", IsosurfaceThreshold);
             }
         }
     }

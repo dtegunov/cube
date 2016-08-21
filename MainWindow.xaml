@@ -67,12 +67,13 @@
             <RowDefinition Height="100" />
             <RowDefinition />
         </Grid.RowDefinitions>
-        
+
         <Grid Margin="10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-                <ColumnDefinition />
+                <ColumnDefinition Width="20*" />
+                <ColumnDefinition Width="25*" />
+                <ColumnDefinition Width="18*" />
+                <ColumnDefinition Width="15*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition />
@@ -84,37 +85,41 @@
             <Button Name="ButtonTomogramPath" Grid.Row="0" Style="{StaticResource HyperlinkLikeButton}" Click="ButtonTomogramPath_OnClick">
                 <TextBlock Name="ButtonTomogramPathText" TextTrimming="CharacterEllipsis">Select tomogram...</TextBlock>
             </Button>
-            <Button Name="ButtonWarpMetaPath" Grid.Row="1" Style="{StaticResource HyperlinkLikeButton}">
+            <Button IsEnabled="False" Foreground="LightGray" Name="ButtonWarpMetaPath" Grid.Row="1" Style="{StaticResource HyperlinkLikeButton}">
                 <TextBlock Name="ButtonWarpMetaPathText" TextTrimming="CharacterEllipsis">Select Warp metadata...</TextBlock>
             </Button>
-            <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
-                <s:ValueSlider Value="{Binding InputLowpass, Mode=TwoWay}" UpdateTrigger="PropertyChanged" TextFormat="Low-pass to {0} Å, " MinValue="1" MaxValue="9999" StepSize="1" />
-                <s:ValueSlider Value="{Binding InputAverageSlices, Mode=TwoWay}" UpdateTrigger="PropertyChanged" TextFormat="average over {0} sclices" MinValue="1" MaxValue="1000" StepSize="1" />
+            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                <!--<s:ValueSlider Value="{Binding InputLowpass, Mode=TwoWay}" UpdateTrigger="PropertyChanged" TextFormat="Low-pass to {0} Å, " MinValue="1" MaxValue="9999" StepSize="1" />-->
+                <s:ValueSlider Value="{Binding InputAverageSlices, Mode=TwoWay}" UpdateTrigger="PropertyChanged" TextFormat="Average over {0} sclices" MinValue="1" MaxValue="1000" StepSize="1" />
             </StackPanel>
-            <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal">
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
                 <s:ValueSlider Value="{Binding DisplayIntensityMin, Mode=TwoWay}" UpdateTrigger="PropertyChanged" TextFormat="Display intensity between {0} " MinValue="-10" MaxValue="-0.01" StepSize="0.01" />
                 <s:ValueSlider Value="{Binding DisplayIntensityMax, Mode=TwoWay}" UpdateTrigger="PropertyChanged" TextFormat="and {0} σ" MinValue="0.01" MaxValue="10" StepSize="0.01" />
             </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                <s:ValueSlider Value="{Binding IsosurfaceThreshold, Mode=TwoWay}" UpdateTrigger="PropertyChanged" TextFormat="Isosurface at {0} σ,  " MinValue="0.01" MaxValue="999" StepSize="0.01" />
+                <CheckBox Content="only central blob" IsChecked="{Binding CentralBlob}" VerticalAlignment="Top" />
+            </StackPanel>
 
-            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+            <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
                 <s:FormattedTextBlock Value="{Binding NParticles}" TextFormat="{}{0} particles, " />
                 <s:ValueSlider Value="{Binding BoxSize, Mode=TwoWay}" UpdateTrigger="PropertyChanged" TextFormat="{}{0} px box" MinValue="2" MaxValue="256" StepSize="2" />
             </StackPanel>
-            <Button Name="ButtonPointsImport" Grid.Row="1" Grid.Column="1" Content="Import Coordinates" Style="{StaticResource HyperlinkLikeButton}" HorizontalAlignment="Left" Click="ButtonPointsImport_OnClick" />
-            <Button Name="ButtonPointsExport" Grid.Row="2" Grid.Column="1" Content="Export Coordinates" Style="{StaticResource HyperlinkLikeButton}" HorizontalAlignment="Left" Click="ButtonPointsExport_OnClick" />
-            <Button Name="ButtonSubtomoExport" Grid.Row="3" Grid.Column="1" Content="Export Sub-Tomograms" Style="{StaticResource HyperlinkLikeButton}" HorizontalAlignment="Left" />
+            <Button Name="ButtonPointsImport" Grid.Row="1" Grid.Column="2" Content="Import Coordinates" Style="{StaticResource HyperlinkLikeButton}" HorizontalAlignment="Left" Click="ButtonPointsImport_OnClick" />
+            <Button Name="ButtonPointsExport" Grid.Row="2" Grid.Column="2" Content="Export Coordinates" Style="{StaticResource HyperlinkLikeButton}" HorizontalAlignment="Left" Click="ButtonPointsExport_OnClick" />
+            <Button IsEnabled="False" Foreground="LightGray" Name="ButtonSubtomoExport" Grid.Row="3" Grid.Column="2" Content="Export Sub-Tomograms" Style="{StaticResource HyperlinkLikeButton}" HorizontalAlignment="Left" />
 
-            <Button Name="ButtonReferencePath" Grid.Row="0" Grid.Column="2" Style="{StaticResource HyperlinkLikeButton}">
+            <Button IsEnabled="False" Foreground="LightGray" Name="ButtonReferencePath" Grid.Row="0" Grid.Column="3" Style="{StaticResource HyperlinkLikeButton}">
                 <TextBlock Name="ButtonReferencePathText" TextTrimming="CharacterEllipsis">Select reference...</TextBlock>
             </Button>
-            <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal">
-                <s:EditableTextBlock Text="{Binding Path=ReferenceSymmetry, Mode=TwoWay}" FontSize="12" Foreground="#0066cc" />
-                <TextBlock Text=" symmetry"/>
+            <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Horizontal">
+                <s:EditableTextBlock IsEnabled="False" Foreground="LightGray" Text="{Binding Path=ReferenceSymmetry, Mode=TwoWay}" FontSize="12" />
+                <TextBlock IsEnabled="False" Foreground="LightGray" Text=" symmetry"/>
             </StackPanel>
-            <CheckBox Grid.Row="2" Grid.Column="2" IsChecked="{Binding DoSnap, Mode=TwoWay}" Content="Snap" />
+            <CheckBox IsEnabled="False" Foreground="LightGray" Grid.Row="2" Grid.Column="3" IsChecked="{Binding DoSnap, Mode=TwoWay}" Content="Snap" />
         </Grid>
-        
-        <Grid Grid.Row="1">
+
+        <Grid Name="GridDisplay"  Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Name="MainGridRow0" MinHeight="50" Height="3*" />
                 <RowDefinition Name="MainGridRow1" MinHeight="50" Height="1*" />
@@ -125,7 +130,7 @@
             </Grid.ColumnDefinitions>
             <GridSplitter Grid.Row="0" Grid.Column="1" ResizeBehavior="PreviousAndCurrent" ResizeDirection="Columns" Width="3" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Stretch" />
             <GridSplitter Grid.Row="0" Grid.Column="1" ResizeBehavior="CurrentAndNext" ResizeDirection="Rows" Width="Auto" Height="3" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" />
-            
+
             <Canvas Name="CanvasZY" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ClipToBounds="True" Margin="2">
                 <Image Name="ImageZY" Cursor="None" MouseWheel="ImageZY_OnMouseWheel" MouseDown="Image_OnMouseDown" MouseUp="Image_OnMouseUp" MouseLeave="Image_OnMouseLeave" MouseMove="ImageZY_OnMouseMove" MouseEnter="ImageZY_OnMouseEnter" />
                 <Canvas Name="CanvasOverlayZY">
@@ -133,6 +138,7 @@
                     <Line Name="CrosshairZYY" StrokeThickness="1" Stroke="Orange" Opacity="0.3" IsHitTestVisible="False" />
                 </Canvas>
                 <Canvas Name="CanvasParticlesZY" />
+                <s:ValueSlider Canvas.Top="0" Canvas.Left="0" Name="SliderPlaneX" TextFormat="X = {0}" Value="{Binding PlaneX, Mode=TwoWay}" UpdateTrigger="PropertyChanged" MinValue="0" StepSize="1" Background="White" Padding="4,0,4,2" />
             </Canvas>
             <Canvas Name="CanvasXY" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ClipToBounds="True" SizeChanged="CanvasXY_OnSizeChanged" Margin="2">
                 <Image Name="ImageXY" Cursor="None" MouseWheel="ImageXY_OnMouseWheel" MouseDown="Image_OnMouseDown" MouseUp="Image_OnMouseUp" MouseLeave="Image_OnMouseLeave" MouseMove="ImageXY_OnMouseMove" MouseEnter="ImageXY_OnMouseEnter" />
@@ -141,6 +147,7 @@
                     <Line Name="CrosshairXYY" StrokeThickness="1" Stroke="Orange" Opacity="0.3" IsHitTestVisible="False" />
                 </Canvas>
                 <Canvas Name="CanvasParticlesXY" />
+                <s:ValueSlider Canvas.Top="0" Canvas.Left="0" Name="SliderPlaneZ" TextFormat="Z = {0}" Value="{Binding PlaneZ, Mode=TwoWay}" UpdateTrigger="PropertyChanged" MinValue="0" StepSize="1" Background="White" Padding="4,0,4,2" />
             </Canvas>
             <Canvas Name="CanvasXZ" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ClipToBounds="True" Margin="2">
                 <Image Name="ImageXZ" Cursor="None" MouseWheel="ImageXZ_OnMouseWheel" MouseDown="Image_OnMouseDown" MouseUp="Image_OnMouseUp" MouseLeave="Image_OnMouseLeave" MouseMove="ImageXZ_OnMouseMove" MouseEnter="ImageXZ_OnMouseEnter" />
@@ -149,9 +156,10 @@
                     <Line Name="CrosshairXZZ" StrokeThickness="1" Stroke="Orange" Opacity="0.3" IsHitTestVisible="False" />
                 </Canvas>
                 <Canvas Name="CanvasParticlesXZ" />
+                <s:ValueSlider Canvas.Top="0" Canvas.Left="0" Name="SliderPlaneY" TextFormat="Y = {0}" Value="{Binding PlaneY, Mode=TwoWay}" UpdateTrigger="PropertyChanged" MinValue="0" StepSize="1" Background="White" Padding="4,0,4,2" />
             </Canvas>
 
-            <Grid Grid.Row="1" Grid.Column="0" Margin="2">
+            <Grid Grid.Row="1" Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Name="ParticleGridRow0" />
                     <RowDefinition Name="ParticleGridRow1" />
@@ -161,9 +169,14 @@
                     <ColumnDefinition Name="ParticleGridColumn1" />
                 </Grid.ColumnDefinitions>
 
-                <Image Name="ImageParticleZY" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-                <Image Name="ImageParticleXY" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-                <Image Name="ImageParticleXZ" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                <Image Name="ImageParticleZY" Grid.Row="0" Grid.Column="0" Margin="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                <s:ValueSlider Grid.Row="0" Grid.Column="0" Name="SliderParticleX" TextFormat="X = {0}" Value="{Binding ParticlePlaneX, Mode=TwoWay}" UpdateTrigger="PropertyChanged" MinValue="0" StepSize="1" Background="White" Margin="2" Padding="4,0,4,2" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                <Image Name="ImageParticleXY" Grid.Row="0" Grid.Column="1" Margin="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                <s:ValueSlider Grid.Row="0" Grid.Column="1" Name="SliderParticleZ" TextFormat="Z = {0}" Value="{Binding ParticlePlaneZ, Mode=TwoWay}" UpdateTrigger="PropertyChanged" MinValue="0" StepSize="1" Background="White" Margin="2" Padding="4,0,4,2" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                <Image Name="ImageParticleXZ" Grid.Row="1" Grid.Column="1" Margin="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                <s:ValueSlider Grid.Row="1" Grid.Column="1" Name="SliderParticleY" TextFormat="Y = {0}" Value="{Binding ParticlePlaneY, Mode=TwoWay}" UpdateTrigger="PropertyChanged" MinValue="0" StepSize="1" Background="White" Margin="2" Padding="4,0,4,2" HorizontalAlignment="Left" VerticalAlignment="Top" />
+
+                <WindowsFormsHost Grid.Row="1" Grid.Column="0" Name="ViewportHost" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="2" Initialized="ViewportHost_OnInitialized" />
             </Grid>
         </Grid>
     </Grid>
