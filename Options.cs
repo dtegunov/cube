@@ -212,6 +212,69 @@ namespace Cube
             set { if (value != _IsosurfaceThreshold) { _IsosurfaceThreshold = value; OnPropertyChanged(); } }
         }
 
+        private int _ImportVolumeWidth = 1000;
+        public int ImportVolumeWidth
+        {
+            get { return _ImportVolumeWidth; }
+            set { if (value != _ImportVolumeWidth) { _ImportVolumeWidth = value; OnPropertyChanged(); } }
+        }
+
+        private int _ImportVolumeHeight = 1000;
+        public int ImportVolumeHeight
+        {
+            get { return _ImportVolumeHeight; }
+            set { if (value != _ImportVolumeHeight) { _ImportVolumeHeight = value; OnPropertyChanged(); } }
+        }
+
+        private int _ImportVolumeDepth = 300;
+        public int ImportVolumeDepth
+        {
+            get { return _ImportVolumeDepth; }
+            set { if (value != _ImportVolumeDepth) { _ImportVolumeDepth = value; OnPropertyChanged(); } }
+        }
+
+        private int _ExportVolumeWidth = 1000;
+        public int ExportVolumeWidth
+        {
+            get { return _ExportVolumeWidth; }
+            set { if (value != _ExportVolumeWidth) { _ExportVolumeWidth = value; OnPropertyChanged(); } }
+        }
+
+        private int _ExportVolumeHeight = 1000;
+        public int ExportVolumeHeight
+        {
+            get { return _ExportVolumeHeight; }
+            set { if (value != _ExportVolumeHeight) { _ExportVolumeHeight = value; OnPropertyChanged(); } }
+        }
+
+        private int _ExportVolumeDepth = 300;
+        public int ExportVolumeDepth
+        {
+            get { return _ExportVolumeDepth; }
+            set { if (value != _ExportVolumeDepth) { _ExportVolumeDepth = value; OnPropertyChanged(); } }
+        }
+
+        private bool _ExportInvertX = false;
+        public bool ExportInvertX
+        {
+            get { return _ExportInvertX; }
+            set { if (value != _ExportInvertX) { _ExportInvertX = value; OnPropertyChanged(); } }
+        }
+
+        private bool _ExportInvertY = false;
+        public bool ExportInvertY
+        {
+            get { return _ExportInvertY; }
+            set { if (value != _ExportInvertY) { _ExportInvertY = value; OnPropertyChanged(); } }
+        }
+
+        private bool _ExportInvertZ = false;
+        public bool ExportInvertZ
+        {
+            get { return _ExportInvertZ; }
+            set { if (value != _ExportInvertZ) { _ExportInvertZ = value; OnPropertyChanged(); } }
+        }
+
         public void Save(string path)
         {
             XmlTextWriter Writer = new XmlTextWriter(File.Create(path), Encoding.Unicode);
@@ -228,6 +291,14 @@ namespace Cube
             XMLHelper.WriteParamNode(Writer, "BoxSize", BoxSize);
             XMLHelper.WriteParamNode(Writer, "CentralBlob", CentralBlob);
             XMLHelper.WriteParamNode(Writer, "IsosurfaceThreshold", IsosurfaceThreshold);
+
+            XMLHelper.WriteParamNode(Writer, "ImportVolumeWidth", ImportVolumeWidth);
+            XMLHelper.WriteParamNode(Writer, "ImportVolumeHeight", ImportVolumeHeight);
+            XMLHelper.WriteParamNode(Writer, "ImportVolumeDepth", ImportVolumeDepth);
+
+            XMLHelper.WriteParamNode(Writer, "ExportVolumeWidth", ExportVolumeWidth);
+            XMLHelper.WriteParamNode(Writer, "ExportVolumeHeight", ExportVolumeHeight);
+            XMLHelper.WriteParamNode(Writer, "ExportVolumeDepth", ExportVolumeDepth);
 
             Writer.WriteEndElement();
             Writer.WriteEndDocument();
@@ -250,6 +321,14 @@ namespace Cube
                 BoxSize = XMLHelper.LoadParamNode(Reader, "BoxSize", BoxSize);
                 CentralBlob = XMLHelper.LoadParamNode(Reader, "CentralBlob", CentralBlob);
                 IsosurfaceThreshold = XMLHelper.LoadParamNode(Reader, "IsosurfaceThreshold", IsosurfaceThreshold);
+
+                ImportVolumeWidth = XMLHelper.LoadParamNode(Reader, "ImportVolumeWidth", ImportVolumeWidth);
+                ImportVolumeHeight = XMLHelper.LoadParamNode(Reader, "ImportVolumeHeight", ImportVolumeHeight);
+                ImportVolumeDepth = XMLHelper.LoadParamNode(Reader, "ImportVolumeDepth", ImportVolumeDepth);
+
+                ExportVolumeWidth = XMLHelper.LoadParamNode(Reader, "ExportVolumeWidth", ExportVolumeWidth);
+                ExportVolumeHeight = XMLHelper.LoadParamNode(Reader, "ExportVolumeHeight", ExportVolumeHeight);
+                ExportVolumeDepth = XMLHelper.LoadParamNode(Reader, "ExportVolumeDepth", ExportVolumeDepth);
             }
         }
     }

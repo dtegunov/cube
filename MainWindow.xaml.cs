@@ -118,7 +118,7 @@ namespace Cube
                         Options.ActiveParticle = null;
 
                     if (Options.ActiveParticle != null)
-                        CenterOn(Options.ActiveParticle.Position);
+                        CenterOn(new int3(Options.ActiveParticle.Position));
                 }
 
                 e.Handled = true;
@@ -139,7 +139,7 @@ namespace Cube
                     Options.ActiveParticle = Particles[NewIndex];
                 }
 
-                CenterOn(Options.ActiveParticle.Position);
+                CenterOn(new int3(Options.ActiveParticle.Position));
 
                 e.Handled = true;
             }
@@ -219,23 +219,23 @@ namespace Cube
             else if (e.PropertyName == "ParticlePlaneX")
             {
                 if (Options.ActiveParticle != null)
-                    MoveParticle(Options.ActiveParticle, new int3(Options.ParticlePlaneX,
+                    MoveParticle(Options.ActiveParticle, new float3(Options.ParticlePlaneX,
                                                                   Options.ActiveParticle.Position.Y,
                                                                   Options.ActiveParticle.Position.Z));
             }
             else if (e.PropertyName == "ParticlePlaneY")
             {
                 if (Options.ActiveParticle != null)
-                    MoveParticle(Options.ActiveParticle, new int3(Options.ActiveParticle.Position.X,
-                                                                  Options.ParticlePlaneY,
-                                                                  Options.ActiveParticle.Position.Z));
+                    MoveParticle(Options.ActiveParticle, new float3(Options.ActiveParticle.Position.X,
+                                                                    Options.ParticlePlaneY,
+                                                                    Options.ActiveParticle.Position.Z));
             }
             else if (e.PropertyName == "ParticlePlaneZ")
             {
                 if (Options.ActiveParticle != null)
-                    MoveParticle(Options.ActiveParticle, new int3(Options.ActiveParticle.Position.X,
-                                                                  Options.ActiveParticle.Position.Y,
-                                                                  Options.ParticlePlaneZ));
+                    MoveParticle(Options.ActiveParticle, new float3(Options.ActiveParticle.Position.X,
+                                                                    Options.ActiveParticle.Position.Y,
+                                                                    Options.ParticlePlaneZ));
             }
             else if (e.PropertyName == "BoxSize")
             {
@@ -282,12 +282,12 @@ namespace Cube
                 {
                     Particle OldParticle = (Particle)oldItem;
 
-                    if (SliceXYParticles[OldParticle.Position.Z].Contains(OldParticle))
-                        SliceXYParticles[OldParticle.Position.Z].Remove(OldParticle);
-                    if (SliceZYParticles[OldParticle.Position.X].Contains(OldParticle))
-                        SliceZYParticles[OldParticle.Position.X].Remove(OldParticle);
-                    if (SliceXZParticles[OldParticle.Position.Y].Contains(OldParticle))
-                        SliceXZParticles[OldParticle.Position.Y].Remove(OldParticle);
+                    if (SliceXYParticles[(int)OldParticle.Position.Z].Contains(OldParticle))
+                        SliceXYParticles[(int)OldParticle.Position.Z].Remove(OldParticle);
+                    if (SliceZYParticles[(int)OldParticle.Position.X].Contains(OldParticle))
+                        SliceZYParticles[(int)OldParticle.Position.X].Remove(OldParticle);
+                    if (SliceXZParticles[(int)OldParticle.Position.Y].Contains(OldParticle))
+                        SliceXZParticles[(int)OldParticle.Position.Y].Remove(OldParticle);
 
                     OldParticle.PropertyChanged -= Particle_PropertyChanged;
                 }
@@ -297,9 +297,9 @@ namespace Cube
                 {
                     Particle NewParticle = (Particle)newItem;
 
-                    SliceXYParticles[NewParticle.Position.Z].Add(NewParticle);
-                    SliceZYParticles[NewParticle.Position.X].Add(NewParticle);
-                    SliceXZParticles[NewParticle.Position.Y].Add(NewParticle);
+                    SliceXYParticles[(int)NewParticle.Position.Z].Add(NewParticle);
+                    SliceZYParticles[(int)NewParticle.Position.X].Add(NewParticle);
+                    SliceXZParticles[(int)NewParticle.Position.Y].Add(NewParticle);
 
                     NewParticle.PropertyChanged += Particle_PropertyChanged;
                 }
@@ -324,9 +324,9 @@ namespace Cube
             {
                 if (e.PropertyName == "Position")
                 {
-                    Options.ParticlePlaneX = Options.ActiveParticle.Position.X;
-                    Options.ParticlePlaneY = Options.ActiveParticle.Position.Y;
-                    Options.ParticlePlaneZ = Options.ActiveParticle.Position.Z;
+                    Options.ParticlePlaneX = (int)Options.ActiveParticle.Position.X;
+                    Options.ParticlePlaneY = (int)Options.ActiveParticle.Position.Y;
+                    Options.ParticlePlaneZ = (int)Options.ActiveParticle.Position.Z;
 
                     UpdateIsosurface();
                 }
@@ -527,7 +527,7 @@ namespace Cube
             int XYElements = Tomogram.Dims.X * Tomogram.Dims.Y;
             float[] Data = new float[PlaneElements];
 
-            int3 Pos = Options.ActiveParticle.Position;
+            int3 Pos = new int3(Options.ActiveParticle.Position);
 
             unsafe
             {
@@ -573,7 +573,7 @@ namespace Cube
             int XYElements = Tomogram.Dims.X * Tomogram.Dims.Y;
             float[] Data = new float[PlaneElements];
 
-            int3 Pos = Options.ActiveParticle.Position;
+            int3 Pos = new int3(Options.ActiveParticle.Position);
 
             unsafe
             {
@@ -619,7 +619,7 @@ namespace Cube
             int XYElements = Tomogram.Dims.X * Tomogram.Dims.Y;
             float[] Data = new float[PlaneElements];
 
-            int3 Pos = Options.ActiveParticle.Position;
+            int3 Pos = new int3(Options.ActiveParticle.Position);
 
             unsafe
             {
@@ -1002,7 +1002,7 @@ namespace Cube
                 Options.PlaneY = Options.MouseY;
                 Options.PlaneZ = Options.MouseZ;
 
-                if (e.ChangedButton == MouseButton.Left)
+                if (e.ChangedButton == MouseButton.Left || e.ChangedButton == MouseButton.Right)
                 {
                     if (SliceXYParticles != null && SliceZYParticles != null && SliceXZParticles != null)
                     {
@@ -1038,7 +1038,7 @@ namespace Cube
 
                         foreach (var part in VisibleParticles)
                         {
-                            float Dist = (part.Position - new int3(Options.MouseX, Options.MouseY, Options.MouseZ)).Length();
+                            float Dist = (part.Position - new float3(Options.MouseX, Options.MouseY, Options.MouseZ)).Length();
                             if (Dist <= BoxRadius)
                                 Candidates.Add(new Tuple<float, Particle>(Dist, part));
                         }
@@ -1047,8 +1047,25 @@ namespace Cube
                         {
                             Candidates.Sort((a, b) => a.Item1.CompareTo(b.Item1));
 
-                            Options.ActiveParticle = Candidates[0].Item2;
-                            DraggingParticle = Candidates[0].Item2;
+                            if (e.ChangedButton == MouseButton.Left)
+                            {
+                                Options.ActiveParticle = Candidates[0].Item2;
+                                DraggingParticle = Candidates[0].Item2;
+                            }
+                            else if (e.ChangedButton == MouseButton.Right)
+                            {
+                                Particle DeletedParticle = Candidates[0].Item2;
+
+                                int OldIndex = Particles.IndexOf(DeletedParticle);
+                                FreezeUpdates = true;
+                                Particles.Remove(DeletedParticle);
+                                FreezeUpdates = false;
+
+                                if (DeletedParticle == Options.ActiveParticle)
+                                    Options.ActiveParticle = null;
+
+                                UpdateBoxes();
+                            }
                         }
                     }
                 }
@@ -1153,7 +1170,7 @@ namespace Cube
             {
                 if (DraggingParticle == null && !Keyboard.IsKeyDown(Key.LeftShift) && !Keyboard.IsKeyDown(Key.RightShift))
                 {
-                    Particle NewParticle = new Particle(new int3(Options.MouseX, Options.MouseY, Options.MouseZ), new float3(0, 0, 0));
+                    Particle NewParticle = new Particle(new float3(Options.MouseX, Options.MouseY, Options.MouseZ), new float3(0, 0, 0));
 
                     // Freeze so boxes aren't redrawn twice upon setting new particle as active
                     FreezeUpdates = true;
@@ -1180,9 +1197,9 @@ namespace Cube
 
             if (Options.ActiveParticle != null)
             {
-                Options.ParticlePlaneX = Options.ActiveParticle.Position.X;
-                Options.ParticlePlaneY = Options.ActiveParticle.Position.Y;
-                Options.ParticlePlaneZ = Options.ActiveParticle.Position.Z;
+                Options.ParticlePlaneX = (int)Options.ActiveParticle.Position.X;
+                Options.ParticlePlaneY = (int)Options.ActiveParticle.Position.Y;
+                Options.ParticlePlaneZ = (int)Options.ActiveParticle.Position.Z;
             }
 
             UpdateIsosurface();
@@ -1197,7 +1214,7 @@ namespace Cube
             {
                 int3 DimsVolume = new int3(Options.BoxSize + 2, Options.BoxSize + 2, Options.BoxSize + 2);
                 float[] VolumeData = new float[DimsVolume.Elements()];
-                int3 Pos = Options.ActiveParticle.Position;
+                int3 Pos = new int3(Options.ActiveParticle.Position);
                 int BoxHalf = Options.BoxSize / 2;
                 int PaddedHalf = DimsVolume.X / 2;
 
@@ -1339,10 +1356,10 @@ namespace Cube
         private void MousePositionChanged()
         {
             if (DraggingParticle != null && Mouse.LeftButton == MouseButtonState.Pressed)
-                MoveParticle(DraggingParticle, new int3(Options.MouseX, Options.MouseY, Options.MouseZ));
+                MoveParticle(DraggingParticle, new float3(Options.MouseX, Options.MouseY, Options.MouseZ));
         }
 
-        private void MoveParticle(Particle particle, int3 newPosition)
+        private void MoveParticle(Particle particle, float3 newPosition)
         {
             if (particle.Position != newPosition)
             {
@@ -1355,9 +1372,9 @@ namespace Cube
 
                 if (Options.ActiveParticle == particle)
                 {
-                    Options.ParticlePlaneX = Options.ActiveParticle.Position.X;
-                    Options.ParticlePlaneY = Options.ActiveParticle.Position.Y;
-                    Options.ParticlePlaneZ = Options.ActiveParticle.Position.Z;
+                    Options.ParticlePlaneX = (int)Options.ActiveParticle.Position.X;
+                    Options.ParticlePlaneY = (int)Options.ActiveParticle.Position.Y;
+                    Options.ParticlePlaneZ = (int)Options.ActiveParticle.Position.Z;
 
                     UpdateParticlePlanes();
                     UpdateIsosurface();
@@ -1443,6 +1460,22 @@ namespace Cube
                 return;
             }
 
+            CoordsImportWindow ImportWindow = new CoordsImportWindow();
+            ImportWindow.DataContext = Options;
+            ImportWindow.ParentWindow = this;
+            ImportWindow.Owner = this;
+
+            ImportWindow.ShowDialog();
+        }
+
+        public void PointsImport()
+        {
+            if (Tomogram == null)
+            {
+                MessageBox.Show("This will not work without a tomogram loaded.");
+                return;
+            }
+
             System.Windows.Forms.OpenFileDialog Dialog = new System.Windows.Forms.OpenFileDialog();
             Dialog.Filter = "Text File|*.txt|STAR File|*.star";
             System.Windows.Forms.DialogResult Result = Dialog.ShowDialog();
@@ -1451,6 +1484,10 @@ namespace Cube
             {
                 FreezeUpdates = true;
                 Particles.Clear();
+
+                float3 ImportScale = new float3((float)Tomogram.Dims.X / Options.ImportVolumeWidth,
+                                                (float)Tomogram.Dims.Y / Options.ImportVolumeHeight,
+                                                (float)Tomogram.Dims.Z / Options.ImportVolumeDepth);
 
                 try
                 {
@@ -1468,7 +1505,7 @@ namespace Cube
                                     continue;
 
                                 if (Parts.Length != 3 && Parts.Length != 6)
-                                    throw new Exception("Tab-delimited text file must have either 3 (XYZ) or 6 (XYZ Rot Tilt Psi columns.");
+                                    throw new Exception("Tab-delimited text file must have either 3 (XYZ) or 6 (XYZ Rot Tilt Psi) columns.");
 
                                 float X = 0, Y = 0, Z = 0, Rot = 0, Tilt = 0, Psi = 0;
                                 if (Parts.Length >= 3)
@@ -1484,11 +1521,18 @@ namespace Cube
                                     Psi = float.Parse(Parts[5]);
                                 }
 
-                                X = Math.Max(0, Math.Min(X, Tomogram.Dims.X - 1));
-                                Y = Math.Max(0, Math.Min(Y, Tomogram.Dims.Y - 1));
-                                Z = Math.Max(0, Math.Min(Z, Tomogram.Dims.Z - 1));
+                                X *= ImportScale.X;
+                                Y *= ImportScale.Y;
+                                Z *= ImportScale.Z;
 
-                                Particle NewParticle = new Particle(new int3((int)X, (int)Y, (int)Z), new float3(Rot, Tilt, Psi));
+                                if (X < 0 || X >= Tomogram.Dims.X || Y < 0 || Y >= Tomogram.Dims.Y || Z < 0 || Z >= Tomogram.Dims.Z)
+                                    continue;
+
+                                /*X = Math.Max(0, Math.Min(X, Tomogram.Dims.X - 1));
+                                Y = Math.Max(0, Math.Min(Y, Tomogram.Dims.Y - 1));
+                                Z = Math.Max(0, Math.Min(Z, Tomogram.Dims.Z - 1));*/
+
+                                Particle NewParticle = new Particle(new float3(X, Y, Z), new float3(Rot, Tilt, Psi));
                                 Particles.Add(NewParticle);
                             }
                         }
@@ -1499,6 +1543,9 @@ namespace Cube
                         string[] ColumnX = Table.GetColumn("rlnCoordinateX");
                         string[] ColumnY = Table.GetColumn("rlnCoordinateY");
                         string[] ColumnZ = Table.GetColumn("rlnCoordinateZ");
+                        string[] ColumnShiftX = Table.GetColumn("rlnOriginX");
+                        string[] ColumnShiftY = Table.GetColumn("rlnOriginY");
+                        string[] ColumnShiftZ = Table.GetColumn("rlnOriginZ");
                         string[] ColumnRot = Table.GetColumn("rlnAngleRot");
                         string[] ColumnTilt = Table.GetColumn("rlnAngleTilt");
                         string[] ColumnPsi = Table.GetColumn("rlnAnglePsi");
@@ -1514,6 +1561,13 @@ namespace Cube
                             if (ColumnZ != null)
                                 Z = float.Parse(ColumnZ[i]);
 
+                            if (ColumnShiftX != null)
+                                X -= float.Parse(ColumnShiftX[i]);
+                            if (ColumnShiftY != null)
+                                Y -= float.Parse(ColumnShiftY[i]);
+                            if (ColumnShiftZ != null)
+                                Z -= float.Parse(ColumnShiftZ[i]);
+
                             if (ColumnRot != null)
                                 Rot = float.Parse(ColumnRot[i]);
                             if (ColumnTilt != null)
@@ -1521,11 +1575,18 @@ namespace Cube
                             if (ColumnPsi != null)
                                 Psi = float.Parse(ColumnPsi[i]);
 
-                            X = Math.Max(0, Math.Min(X, Tomogram.Dims.X - 1));
-                            Y = Math.Max(0, Math.Min(Y, Tomogram.Dims.Y - 1));
-                            Z = Math.Max(0, Math.Min(Z, Tomogram.Dims.Z - 1));
+                            X *= ImportScale.X;
+                            Y *= ImportScale.Y;
+                            Z *= ImportScale.Z;
 
-                            Particle NewParticle = new Particle(new int3((int)X, (int)Y, (int)Z), new float3(Rot, Tilt, Psi));
+                            if (X < 0 || X >= Tomogram.Dims.X || Y < 0 || Y >= Tomogram.Dims.Y || Z < 0 || Z >= Tomogram.Dims.Z)
+                                continue;
+
+                            /*X = Math.Max(0, Math.Min(X, Tomogram.Dims.X - 1));
+                            Y = Math.Max(0, Math.Min(Y, Tomogram.Dims.Y - 1));
+                            Z = Math.Max(0, Math.Min(Z, Tomogram.Dims.Z - 1));*/
+
+                            Particle NewParticle = new Particle(new float3(X, Y, Z), new float3(Rot, Tilt, Psi));
                             Particles.Add(NewParticle);
                         }
                     }
@@ -1548,6 +1609,22 @@ namespace Cube
                 return;
             }
 
+            CoordsExportWindow ExportWindow = new CoordsExportWindow();
+            ExportWindow.DataContext = Options;
+            ExportWindow.ParentWindow = this;
+            ExportWindow.Owner = this;
+
+            ExportWindow.ShowDialog();
+        }
+
+        public void PointsExport()
+        {
+            if (Tomogram == null)
+            {
+                MessageBox.Show("This will not work without a tomogram loaded.");
+                return;
+            }
+
             System.Windows.Forms.SaveFileDialog Dialog = new System.Windows.Forms.SaveFileDialog();
             Dialog.Filter = "STAR File|*.star";
             System.Windows.Forms.DialogResult Result = Dialog.ShowDialog();
@@ -1556,6 +1633,10 @@ namespace Cube
             {
                 FileInfo Info = new FileInfo(Options.PathTomogram);
                 string MicName = Info.Name;
+
+                float3 ExportScale = new float3((float)Options.ExportVolumeWidth / Tomogram.Dims.X,
+                                                (float)Options.ExportVolumeHeight / Tomogram.Dims.Y,
+                                                (float)Options.ExportVolumeDepth / Tomogram.Dims.Z);
 
                 Star Table = new Star(new[]
                 {
@@ -1572,11 +1653,20 @@ namespace Cube
                 });
 
                 foreach (var particle in Particles)
+                {
+                    float3 Scaled = particle.Position * ExportScale;
+                    if (Options.ExportInvertX)
+                        Scaled.X = Options.ExportVolumeWidth - Scaled.X - 1;
+                    if (Options.ExportInvertY)
+                        Scaled.Y = Options.ExportVolumeHeight - Scaled.Y - 1;
+                    if (Options.ExportInvertZ)
+                        Scaled.Z = Options.ExportVolumeDepth - Scaled.Z - 1;
+
                     Table.AddRow(new List<string>()
                     {
-                        particle.Position.X.ToString(),
-                        particle.Position.Y.ToString(),
-                        particle.Position.Z.ToString(),
+                        Scaled.X.ToString(CultureInfo.InvariantCulture),
+                        Scaled.Y.ToString(CultureInfo.InvariantCulture),
+                        Scaled.Z.ToString(CultureInfo.InvariantCulture),
                         "0",
                         "0",
                         "0",
@@ -1585,6 +1675,7 @@ namespace Cube
                         particle.Angle.Z.ToString(CultureInfo.InvariantCulture),
                         MicName
                     });
+                }
 
                 Table.Save(Dialog.FileName);
             }

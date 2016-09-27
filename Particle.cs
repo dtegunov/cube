@@ -5,8 +5,8 @@ namespace Cube
 {
     public class Particle : DataBase
     {
-        private int3 _Position = new int3(0, 0, 0);
-        public int3 Position
+        private float3 _Position = new float3(0, 0, 0);
+        public float3 Position
         {
             get { return _Position; }
             set { if (value != _Position) { _Position = value; OnPropertyChanged(); } }
@@ -26,7 +26,7 @@ namespace Cube
             set { if (value != _IsSelected) { _IsSelected = value; OnPropertyChanged(); } }
         }
 
-        public Particle(int3 position, float3 angle)
+        public Particle(float3 position, float3 angle)
         {
             Position = position;
             Angle = angle;
