@@ -1123,6 +1123,64 @@ namespace Cube
                 Options.PlaneX = Options.MouseX;
                 Options.PlaneY = Options.MouseY;
             }
+
+            if (!IsDragging && e.RightButton == MouseButtonState.Pressed)
+            {
+                if (SliceXYParticles != null && SliceZYParticles != null && SliceXZParticles != null)
+                {
+                    List<Particle> VisibleParticles = new List<Particle>();
+
+                    if (sender == ImageXY)
+                    {
+                        int FirstSlice = Options.MouseZ - Options.BoxSize / 2;
+                        int LastSlice = FirstSlice + Options.BoxSize;
+
+                        for (int s = Math.Max(0, FirstSlice); s < Math.Min(LastSlice, Tomogram.Dims.Z); s++)
+                            VisibleParticles.AddRange(SliceXYParticles[s]);
+                    }
+                    else if (sender == ImageZY)
+                    {
+                        int FirstSlice = Options.MouseX - Options.BoxSize / 2;
+                        int LastSlice = FirstSlice + Options.BoxSize;
+
+                        for (int s = Math.Max(0, FirstSlice); s < Math.Min(LastSlice, Tomogram.Dims.X); s++)
+                            VisibleParticles.AddRange(SliceZYParticles[s]);
+                    }
+                    else if (sender == ImageXZ)
+                    {
+                        int FirstSlice = Options.MouseY - Options.BoxSize / 2;
+                        int LastSlice = FirstSlice + Options.BoxSize;
+
+                        for (int s = Math.Max(0, FirstSlice); s < Math.Min(LastSlice, Tomogram.Dims.Y); s++)
+                            VisibleParticles.AddRange(SliceXZParticles[s]);
+                    }
+
+                    float BoxRadius = Options.BoxSize / 2;
+                    List<Tuple<float, Particle>> Candidates = new List<Tuple<float, Particle>>();
+
+                    foreach (var part in VisibleParticles)
+                    {
+                        float Dist = (part.Position - new float3(Options.MouseX, Options.MouseY, Options.MouseZ)).Length();
+                        if (Dist <= BoxRadius)
+                            Candidates.Add(new Tuple<float, Particle>(Dist, part));
+                    }
+
+                    if (Candidates.Count > 0)
+                    {
+                        Particle DeletedParticle = Candidates[0].Item2;
+
+                        int OldIndex = Particles.IndexOf(DeletedParticle);
+                        FreezeUpdates = true;
+                        Particles.Remove(DeletedParticle);
+                        FreezeUpdates = false;
+
+                        if (DeletedParticle == Options.ActiveParticle)
+                            Options.ActiveParticle = null;
+
+                        UpdateBoxes();
+                    }
+                }
+            }
         }
 
         private void ImageXZ_OnMouseMove(object sender, MouseEventArgs e)
@@ -1502,7 +1560,12 @@ namespace Cube
                                 string[] Parts = Line.Split(new[] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
 
                                 if (Parts.Length < 3)
-                                    continue;
+                                {
+                                    Parts = Line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                                    if (Parts.Length < 3)
+                                        continue;
+                                }
 
                                 if (Parts.Length != 3 && Parts.Length != 6)
                                     throw new Exception("Tab-delimited text file must have either 3 (XYZ) or 6 (XYZ Rot Tilt Psi) columns.");
@@ -1520,6 +1583,15 @@ namespace Cube
                                     Tilt = float.Parse(Parts[4]);
                                     Psi = float.Parse(Parts[5]);
                                 }
+
+                                //Z -= 57;
+
+                                if (Options.ImportInvertX)
+                                    X = Options.ImportVolumeWidth - X - 1;
+                                if (Options.ImportInvertY)
+                                    Y = Options.ImportVolumeHeight - Y - 1;
+                                if (Options.ImportInvertZ)
+                                    Z = Options.ImportVolumeDepth - Z - 1;
 
                                 X *= ImportScale.X;
                                 Y *= ImportScale.Y;
@@ -1574,6 +1646,13 @@ namespace Cube
                                 Tilt = float.Parse(ColumnTilt[i]);
                             if (ColumnPsi != null)
                                 Psi = float.Parse(ColumnPsi[i]);
+
+                            if (Options.ImportInvertX)
+                                X = Options.ImportVolumeWidth - X - 1;
+                            if (Options.ImportInvertY)
+                                Y = Options.ImportVolumeHeight - Y - 1;
+                            if (Options.ImportInvertZ)
+                                Z = Options.ImportVolumeDepth - Z - 1;
 
                             X *= ImportScale.X;
                             Y *= ImportScale.Y;

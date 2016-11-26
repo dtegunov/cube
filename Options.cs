@@ -233,6 +233,27 @@ namespace Cube
             set { if (value != _ImportVolumeDepth) { _ImportVolumeDepth = value; OnPropertyChanged(); } }
         }
 
+        private bool _ImportInvertX = false;
+        public bool ImportInvertX
+        {
+            get { return _ImportInvertX; }
+            set { if (value != _ImportInvertX) { _ImportInvertX = value; OnPropertyChanged(); } }
+        }
+
+        private bool _ImportInvertY = false;
+        public bool ImportInvertY
+        {
+            get { return _ImportInvertY; }
+            set { if (value != _ImportInvertY) { _ImportInvertY = value; OnPropertyChanged(); } }
+        }
+
+        private bool _ImportInvertZ = false;
+        public bool ImportInvertZ
+        {
+            get { return _ImportInvertZ; }
+            set { if (value != _ImportInvertZ) { _ImportInvertZ = value; OnPropertyChanged(); } }
+        }
+
         private int _ExportVolumeWidth = 1000;
         public int ExportVolumeWidth
         {
