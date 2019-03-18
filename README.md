@@ -1,6 +1,6 @@
 ![Cube screenshot](https://raw.githubusercontent.com/dtegunov/cube/master/github.png)
 
-#Cube – making sub-tomogram picking suck slightly less.
+# Cube â€“ making sub-tomogram picking suck slightly less.
 
 ## You will need
 - [Precompiled binaries](https://github.com/dtegunov/cube/raw/master/Precompiled/Precompiled.zip) (compiling the code yourself will likely fail because I don't synchronize updates for all dependencies)
@@ -24,4 +24,4 @@
 
 ## Authorship
 
-Cube is being developed by Dimitry Tegunov ([tegunov@gmail.com](mailto:tegunov@gmail.com)), currently in Patrick Cramer's lab at the Max Planck Institute for Biophysical Chemistry in Göttingen, Germany.
+Cube is being developed by Dimitry Tegunov ([tegunov@gmail.com](mailto:tegunov@gmail.com)), currently in Patrick Cramer's lab at the Max Planck Institute for Biophysical Chemistry in GÃ¶ttingen, Germany.
