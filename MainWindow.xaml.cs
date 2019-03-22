@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,8 +20,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using Membranogram;
-using Membranogram.Helpers;
+using Membranorama;
+using Membranorama.Helpers;
 using OpenTK;
 using Warp;
 using Warp.Headers;
@@ -39,6 +40,8 @@ namespace Cube
         bool FreezeUpdates = false;
 
         ObservableCollection<Particle> Particles = new ObservableCollection<Particle>();
+        ObservableCollection<Particle> DeletedParticles = new ObservableCollection<Particle>();
+
         List<Particle>[] SliceXYParticles = null;
         List<Particle>[] SliceZYParticles = null;
         List<Particle>[] SliceXZParticles = null;
@@ -56,6 +59,19 @@ namespace Cube
         Viewport Viewport;
         GLSLProgram IsosurfaceProgram;
         Mesh ParticleIsosurface = null;
+
+        IEnumerable<Particle> GoodParticles => Particles.Where(p => p.Score >= (float)Options.ParticleScoreMin && p.Score <= (float)Options.ParticleScoreMax);
+        IEnumerable<Particle> BadParticles
+        {
+            get
+            {
+                List<Particle> Result = new List<Particle>();
+                Result.AddRange(Particles.Where(p => p.Score < (float)Options.ParticleScoreMin || p.Score > (float)Options.ParticleScoreMax));
+                Result.AddRange(DeletedParticles);
+
+                return Result;
+            }
+        }
 
         public MainWindow()
         {
@@ -107,6 +123,7 @@ namespace Cube
                 {
                     int OldIndex = Particles.IndexOf(Options.ActiveParticle);
                     FreezeUpdates = true;
+                    DeletedParticles.Add(Options.ActiveParticle);
                     Particles.Remove(Options.ActiveParticle);
                     FreezeUpdates = false;
 
@@ -163,11 +180,7 @@ namespace Cube
             if (FreezeUpdates)
                 return;
 
-            if (e.PropertyName == "PathTomogram")
-            {
-                LoadTomogram();
-            }
-            else if (e.PropertyName == "InputLowpass")
+            if (e.PropertyName == "InputLowpass")
             {
                 UpdateTomogramPlanes();
                 UpdateParticlePlanes();
@@ -251,6 +264,11 @@ namespace Cube
             {
                 UpdateIsosurface();
             }
+            else if (e.PropertyName == "ParticleScoreMin" || e.PropertyName == "ParticleScoreMax")
+            {
+                Options.NParticles = GoodParticles.Count();
+                UpdateBoxes();
+            }
         }
 
         private void CanvasXY_OnSizeChanged(object sender, SizeChangedEventArgs e)
@@ -275,7 +293,7 @@ namespace Cube
             if (SliceXYParticles == null || SliceZYParticles == null || SliceXZParticles == null)
                 return;
 
-            Options.NParticles = Particles.Count;
+            Options.NParticles = GoodParticles.Count();
 
             if (e.OldItems != null)
                 foreach (var oldItem in e.OldItems)
@@ -333,17 +351,17 @@ namespace Cube
             }
         }
 
-        private void LoadTomogram()
+        private void LoadTomogram(string path)
         {
-            if (!File.Exists(Options.PathTomogram))
+            if (!File.Exists(path))
                 return;
 
-            GridDisplay.Visibility = Visibility.Collapsed;
+            //GridDisplay.Visibility = Visibility.Collapsed;
 
-            HeaderMRC Header = (HeaderMRC)MapHeader.ReadFromFile(Options.PathTomogram);
-            PixelSize = Header.Pixelsize.X;
+            HeaderMRC Header = (HeaderMRC)MapHeader.ReadFromFile(path);
+            PixelSize = Header.PixelSize.X;
 
-            float[][] TomoData = IOHelper.ReadMapFloat(Options.PathTomogram, new int2(1, 1), 0, typeof (float));
+            float[][] TomoData = IOHelper.ReadMapFloat(path, new int2(1, 1), 0, typeof (float));
             Tomogram = new Image(TomoData, Header.Dimensions);
 
             TomogramContinuous = Tomogram.GetHostContinuousCopy();
@@ -359,6 +377,7 @@ namespace Cube
             Options.ViewZ = Tomogram.Dims.Z / 2;
 
             Particles.Clear();
+            DeletedParticles.Clear();
             Options.ActiveParticle = null;
 
             SliceXYParticles = new List<Particle>[Tomogram.Dims.Z];
@@ -371,20 +390,24 @@ namespace Cube
             for (int i = 0; i < SliceXZParticles.Length; i++)
                 SliceXZParticles[i] = new List<Particle>();
 
-            SliderPlaneX.MaxValue = Tomogram.Dims.X - 1;
-            SliderPlaneY.MaxValue = Tomogram.Dims.Y - 1;
-            SliderPlaneZ.MaxValue = Tomogram.Dims.Z - 1;
+            Dispatcher.Invoke(() =>
+            {
+                SliderPlaneX.MaxValue = Tomogram.Dims.X - 1;
+                SliderPlaneY.MaxValue = Tomogram.Dims.Y - 1;
+                SliderPlaneZ.MaxValue = Tomogram.Dims.Z - 1;
 
-            SliderParticleX.MaxValue = Tomogram.Dims.X - 1;
-            SliderParticleY.MaxValue = Tomogram.Dims.Y - 1;
-            SliderParticleZ.MaxValue = Tomogram.Dims.Z - 1;
+                SliderParticleX.MaxValue = Tomogram.Dims.X - 1;
+                SliderParticleY.MaxValue = Tomogram.Dims.Y - 1;
+                SliderParticleZ.MaxValue = Tomogram.Dims.Z - 1;
 
-            UpdateTomogramPlanes();
-            UpdateView();
+                FreezeUpdates = false;
 
-            FreezeUpdates = false;
+                UpdateTomogramPlanes();
+                UpdateView();
+                UpdateBoxes();
 
-            Dispatcher.InvokeAsync(() => GridDisplay.Visibility = Visibility.Visible, DispatcherPriority.ApplicationIdle);
+                GridDisplay.Visibility = Visibility.Visible;
+            });
         }
 
         #region Tomogram planes
@@ -800,7 +823,9 @@ namespace Cube
 
                 double BoxRadius = Options.BoxSize / 2;
 
-                foreach (var part in VisibleParticles)
+                CanvasParticlesXY.Visibility = Visibility.Collapsed;
+
+                foreach (var part in VisibleParticles.Where(p => p.Score >= (float)Options.ParticleScoreMin && p.Score <= (float)Options.ParticleScoreMax))
                 {
                     double Dist = (Options.PlaneZ - part.Position.Z) / BoxRadius;
                     double Angle = Math.Asin(Dist);
@@ -819,7 +844,10 @@ namespace Cube
                     Canvas.SetLeft(Circle, (part.Position.X - R) * (double)Options.ZoomLevel);
                     Canvas.SetBottom(Circle, (part.Position.Y - R) * (double)Options.ZoomLevel);
                     CanvasParticlesXY.Children.Add(Circle);
+                    part.BoxXY = Circle;
                 }
+
+                CanvasParticlesXY.Visibility = Visibility.Visible;
             }
         }
 
@@ -839,7 +867,9 @@ namespace Cube
 
                 double BoxRadius = Options.BoxSize / 2;
 
-                foreach (var part in VisibleParticles)
+                CanvasParticlesZY.Visibility = Visibility.Collapsed;
+
+                foreach (var part in VisibleParticles.Where(p => p.Score >= (float)Options.ParticleScoreMin && p.Score <= (float)Options.ParticleScoreMax))
                 {
                     double Dist = (Options.PlaneX - part.Position.X) / BoxRadius;
                     double Angle = Math.Asin(Dist);
@@ -858,7 +888,10 @@ namespace Cube
                     Canvas.SetLeft(Circle, (part.Position.Z - R) * (double)Options.ZoomLevel);
                     Canvas.SetBottom(Circle, (part.Position.Y - R) * (double)Options.ZoomLevel);
                     CanvasParticlesZY.Children.Add(Circle);
+                    part.BoxZY = Circle;
                 }
+
+                CanvasParticlesZY.Visibility = Visibility.Visible;
             }
         }
 
@@ -878,7 +911,9 @@ namespace Cube
 
                 double BoxRadius = Options.BoxSize / 2;
 
-                foreach (var part in VisibleParticles)
+                CanvasParticlesXZ.Visibility = Visibility.Collapsed;
+
+                foreach (var part in VisibleParticles.Where(p => p.Score >= (float)Options.ParticleScoreMin && p.Score <= (float)Options.ParticleScoreMax))
                 {
                     double Dist = (Options.PlaneY - part.Position.Y) / BoxRadius;
                     double Angle = Math.Asin(Dist);
@@ -897,11 +932,48 @@ namespace Cube
                     Canvas.SetLeft(Circle, (part.Position.X - R) * (double)Options.ZoomLevel);
                     Canvas.SetBottom(Circle, (part.Position.Z - R) * (double)Options.ZoomLevel);
                     CanvasParticlesXZ.Children.Add(Circle);
+                    part.BoxXZ = Circle;
                 }
+
+                CanvasParticlesXZ.Visibility = Visibility.Visible;
             }
         }
 
         #endregion
+
+        private void UpdateParticleScores()
+        {
+            float ScoreMin = MathHelper.Min(Particles.Select(p => p.Score));
+            float ScoreMax = MathHelper.Max(Particles.Select(p => p.Score));
+            float ScoreSpread = ScoreMax - ScoreMin;
+
+            SliderParticleScoreMin.MinValue = (decimal)ScoreMin;
+            SliderParticleScoreMin.MaxValue = (decimal)ScoreMax;
+
+            SliderParticleScoreMax.MinValue = (decimal)ScoreMin;
+            SliderParticleScoreMax.MaxValue = (decimal)ScoreMax;
+
+            Options.ParticleScoreMin = (decimal)ScoreMin;
+            Options.ParticleScoreMax = (decimal)ScoreMax;
+
+            if (ScoreSpread == 0)
+            {
+                SliderParticleScoreMin.StepSize = 0;
+                SliderParticleScoreMax.StepSize = 0;
+            }
+            else
+            {
+                float Order = (float)Math.Floor(Math.Log10(ScoreMax));
+                float StepSize = (float)Math.Pow(10, Order - 3);
+
+                SliderParticleScoreMin.StepSize = (decimal)StepSize;
+                SliderParticleScoreMax.StepSize = (decimal)StepSize;
+            }
+
+            UpdateBoxes();
+
+            Options.NParticles = GoodParticles.Count();
+        }
 
         private void ButtonTomogramPath_OnClick(object sender, RoutedEventArgs e)
         {
@@ -922,6 +994,26 @@ namespace Cube
                     long Elements = (long)Header.Dimensions.X * Header.Dimensions.Y * Header.Dimensions.Z;
                     if (Elements > int.MaxValue)
                         throw new Exception("Volumes with more than 2^31-1 elements are not supported, please scale it down.");
+
+                    GridProcessingOverlay.Visibility = Visibility.Visible;
+                    TextProcessingMessage.Text = "Loading " + Options.PathTomogram + "...";
+
+                    Thread LoadingThread = new Thread(() =>
+                    {
+                        try
+                        {
+                            LoadTomogram(Options.PathTomogram);
+                        }
+                        catch (Exception exc)
+                        {
+                        }
+                        finally
+                        {
+                            GridProcessingOverlay.Dispatcher.Invoke(() => GridProcessingOverlay.Visibility = Visibility.Hidden);
+                        }
+                    });
+
+                    LoadingThread.Start();
                 }
                 catch (Exception ex)
                 {
@@ -1046,22 +1138,31 @@ namespace Cube
                         if (Candidates.Count > 0)
                         {
                             Candidates.Sort((a, b) => a.Item1.CompareTo(b.Item1));
+                            Particle ClickedParticle = Candidates[0].Item2;
 
                             if (e.ChangedButton == MouseButton.Left)
                             {
-                                Options.ActiveParticle = Candidates[0].Item2;
-                                DraggingParticle = Candidates[0].Item2;
+                                if (GoodParticles.Contains(ClickedParticle))
+                                {
+                                    Options.ActiveParticle = ClickedParticle;
+                                    DraggingParticle = ClickedParticle;
+                                }
+                                else
+                                {
+                                    ClickedParticle.Score = (float)Options.ParticleScoreMax;
+                                    DeletedParticles.Remove(ClickedParticle);
+                                    Particles.Add(ClickedParticle);
+                                }
                             }
                             else if (e.ChangedButton == MouseButton.Right)
                             {
-                                Particle DeletedParticle = Candidates[0].Item2;
-
-                                int OldIndex = Particles.IndexOf(DeletedParticle);
+                                int OldIndex = Particles.IndexOf(ClickedParticle);
                                 FreezeUpdates = true;
-                                Particles.Remove(DeletedParticle);
+                                Particles.Remove(ClickedParticle);
+                                DeletedParticles.Add(ClickedParticle);
                                 FreezeUpdates = false;
 
-                                if (DeletedParticle == Options.ActiveParticle)
+                                if (ClickedParticle == Options.ActiveParticle)
                                     Options.ActiveParticle = null;
 
                                 UpdateBoxes();
@@ -1172,12 +1273,15 @@ namespace Cube
                         int OldIndex = Particles.IndexOf(DeletedParticle);
                         FreezeUpdates = true;
                         Particles.Remove(DeletedParticle);
+                        DeletedParticles.Add(DeletedParticle);
                         FreezeUpdates = false;
 
                         if (DeletedParticle == Options.ActiveParticle)
                             Options.ActiveParticle = null;
 
-                        UpdateBoxes();
+                        CanvasParticlesXY.Children.Remove(DeletedParticle.BoxXY);
+                        CanvasParticlesZY.Children.Remove(DeletedParticle.BoxZY);
+                        CanvasParticlesXZ.Children.Remove(DeletedParticle.BoxXZ);
                     }
                 }
             }
@@ -1542,6 +1646,7 @@ namespace Cube
             {
                 FreezeUpdates = true;
                 Particles.Clear();
+                DeletedParticles.Clear();
 
                 float3 ImportScale = new float3((float)Tomogram.Dims.X / Options.ImportVolumeWidth,
                                                 (float)Tomogram.Dims.Y / Options.ImportVolumeHeight,
@@ -1615,15 +1720,27 @@ namespace Cube
                         string[] ColumnX = Table.GetColumn("rlnCoordinateX");
                         string[] ColumnY = Table.GetColumn("rlnCoordinateY");
                         string[] ColumnZ = Table.GetColumn("rlnCoordinateZ");
+
                         string[] ColumnShiftX = Table.GetColumn("rlnOriginX");
                         string[] ColumnShiftY = Table.GetColumn("rlnOriginY");
                         string[] ColumnShiftZ = Table.GetColumn("rlnOriginZ");
+
                         string[] ColumnRot = Table.GetColumn("rlnAngleRot");
                         string[] ColumnTilt = Table.GetColumn("rlnAngleTilt");
                         string[] ColumnPsi = Table.GetColumn("rlnAnglePsi");
 
+                        string[] ColumnTomoName = Table.GetColumn("rlnMicrographName");
+
+                        string[] ColumnScore = Table.GetColumn("rlnAutopickFigureOfMerit");
+
+                        string TomoRootName = Helper.PathToName(Options.PathTomogram);
+
                         for (int i = 0; i < Table.RowCount; i++)
                         {
+                            //if (ColumnTomoName != null)
+                            //    if (!ColumnTomoName[i].Contains(TomoRootName))
+                            //        continue;
+
                             float X = 0, Y = 0, Z = 0, Rot = 0, Tilt = 0, Psi = 0;
 
                             if (ColumnX != null)
@@ -1666,6 +1783,10 @@ namespace Cube
                             Z = Math.Max(0, Math.Min(Z, Tomogram.Dims.Z - 1));*/
 
                             Particle NewParticle = new Particle(new float3(X, Y, Z), new float3(Rot, Tilt, Psi));
+
+                            if (ColumnScore != null)
+                                NewParticle.Score = float.Parse(ColumnScore[i], CultureInfo.InvariantCulture);
+
                             Particles.Add(NewParticle);
                         }
                     }
@@ -1674,6 +1795,8 @@ namespace Cube
                 {
                     MessageBox.Show("Couldn't parse file: " + ex.Message);
                 }
+
+                UpdateParticleScores();
 
                 FreezeUpdates = false;
                 UpdateBoxes();
@@ -1696,6 +1819,57 @@ namespace Cube
             ExportWindow.ShowDialog();
         }
 
+        private void ExportToStar(IEnumerable<Particle> particles, string path)
+        {
+            FileInfo Info = new FileInfo(Options.PathTomogram);
+            string MicName = Info.Name;
+
+            float3 ExportScale = new float3((float)Options.ExportVolumeWidth / Tomogram.Dims.X,
+                                            (float)Options.ExportVolumeHeight / Tomogram.Dims.Y,
+                                            (float)Options.ExportVolumeDepth / Tomogram.Dims.Z);
+
+            Star Table = new Star(new[]
+            {
+                    "rlnCoordinateX",
+                    "rlnCoordinateY",
+                    "rlnCoordinateZ",
+                    "rlnOriginX",
+                    "rlnOriginY",
+                    "rlnOriginZ",
+                    "rlnAngleRot",
+                    "rlnAngleTilt",
+                    "rlnAnglePsi",
+                    "rlnMicrographName"
+                });
+
+            foreach (var particle in particles)
+            {
+                float3 Scaled = particle.Position * ExportScale;
+                if (Options.ExportInvertX)
+                    Scaled.X = Options.ExportVolumeWidth - Scaled.X - 1;
+                if (Options.ExportInvertY)
+                    Scaled.Y = Options.ExportVolumeHeight - Scaled.Y - 1;
+                if (Options.ExportInvertZ)
+                    Scaled.Z = Options.ExportVolumeDepth - Scaled.Z - 1;
+
+                Table.AddRow(new List<string>()
+                    {
+                        Scaled.X.ToString(CultureInfo.InvariantCulture),
+                        Scaled.Y.ToString(CultureInfo.InvariantCulture),
+                        Scaled.Z.ToString(CultureInfo.InvariantCulture),
+                        "0",
+                        "0",
+                        "0",
+                        particle.Angle.X.ToString(CultureInfo.InvariantCulture),
+                        particle.Angle.Y.ToString(CultureInfo.InvariantCulture),
+                        particle.Angle.Z.ToString(CultureInfo.InvariantCulture),
+                        MicName
+                    });
+            }
+
+            Table.Save(path);
+        }
+
         public void PointsExport()
         {
             if (Tomogram == null)
@@ -1710,53 +1884,8 @@ namespace Cube
 
             if (Result.ToString() == "OK")
             {
-                FileInfo Info = new FileInfo(Options.PathTomogram);
-                string MicName = Info.Name;
-
-                float3 ExportScale = new float3((float)Options.ExportVolumeWidth / Tomogram.Dims.X,
-                                                (float)Options.ExportVolumeHeight / Tomogram.Dims.Y,
-                                                (float)Options.ExportVolumeDepth / Tomogram.Dims.Z);
-
-                Star Table = new Star(new[]
-                {
-                    "rlnCoordinateX",
-                    "rlnCoordinateY",
-                    "rlnCoordinateZ",
-                    "rlnOriginX",
-                    "rlnOriginY",
-                    "rlnOriginZ",
-                    "rlnAngleRot",
-                    "rlnAngleTilt",
-                    "rlnAnglePsi",
-                    "rlnMicrographName"
-                });
-
-                foreach (var particle in Particles)
-                {
-                    float3 Scaled = particle.Position * ExportScale;
-                    if (Options.ExportInvertX)
-                        Scaled.X = Options.ExportVolumeWidth - Scaled.X - 1;
-                    if (Options.ExportInvertY)
-                        Scaled.Y = Options.ExportVolumeHeight - Scaled.Y - 1;
-                    if (Options.ExportInvertZ)
-                        Scaled.Z = Options.ExportVolumeDepth - Scaled.Z - 1;
-
-                    Table.AddRow(new List<string>()
-                    {
-                        Scaled.X.ToString(CultureInfo.InvariantCulture),
-                        Scaled.Y.ToString(CultureInfo.InvariantCulture),
-                        Scaled.Z.ToString(CultureInfo.InvariantCulture),
-                        "0",
-                        "0",
-                        "0",
-                        particle.Angle.X.ToString(CultureInfo.InvariantCulture),
-                        particle.Angle.Y.ToString(CultureInfo.InvariantCulture),
-                        particle.Angle.Z.ToString(CultureInfo.InvariantCulture),
-                        MicName
-                    });
-                }
-
-                Table.Save(Dialog.FileName);
+                ExportToStar(GoodParticles, Dialog.FileName);
+                ExportToStar(BadParticles, Dialog.FileName + ".bad");
             }
         }
 

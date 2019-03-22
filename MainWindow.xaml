@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:m="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-        xmlns:s="clr-namespace:Sparta;assembly=WarpLib"
+        xmlns:s="clr-namespace:Sparta;assembly=WarpControls"
         xmlns:local="clr-namespace:Cube"
         mc:Ignorable="d"
         Closing="MainWindow_OnClosing"
@@ -107,7 +107,11 @@
             </StackPanel>
             <Button Name="ButtonPointsImport" Grid.Row="1" Grid.Column="2" Content="Import Coordinates" Style="{StaticResource HyperlinkLikeButton}" HorizontalAlignment="Left" Click="ButtonPointsImport_OnClick" />
             <Button Name="ButtonPointsExport" Grid.Row="2" Grid.Column="2" Content="Export Coordinates" Style="{StaticResource HyperlinkLikeButton}" HorizontalAlignment="Left" Click="ButtonPointsExport_OnClick" />
-            <Button IsEnabled="False" Foreground="LightGray" Name="ButtonSubtomoExport" Grid.Row="3" Grid.Column="2" Content="Export Sub-Tomograms" Style="{StaticResource HyperlinkLikeButton}" HorizontalAlignment="Left" />
+            <!--<Button IsEnabled="False" Foreground="LightGray" Name="ButtonSubtomoExport" Grid.Row="3" Grid.Column="2" Content="Export Sub-Tomograms" Style="{StaticResource HyperlinkLikeButton}" HorizontalAlignment="Left" />-->
+            <StackPanel Grid.Row="3" Grid.Column="2" Orientation="Horizontal">
+                <s:ValueSlider Name="SliderParticleScoreMin" Value="{Binding ParticleScoreMin, Mode=TwoWay}" UpdateTrigger="PropertyChanged" TextFormat="Limit scores to {0}" MinValue="0.0" MaxValue="10" StepSize="0.01" />
+                <s:ValueSlider Name="SliderParticleScoreMax" Value="{Binding ParticleScoreMax, Mode=TwoWay}" UpdateTrigger="PropertyChanged" TextFormat="–{0}" MinValue="0.0" MaxValue="10" StepSize="0.01" />
+            </StackPanel>
 
             <Button IsEnabled="False" Foreground="LightGray" Name="ButtonReferencePath" Grid.Row="0" Grid.Column="3" Style="{StaticResource HyperlinkLikeButton}">
                 <TextBlock Name="ButtonReferencePathText" TextTrimming="CharacterEllipsis">Select reference...</TextBlock>
@@ -178,6 +182,12 @@
 
                 <WindowsFormsHost Grid.Row="1" Grid.Column="0" Name="ViewportHost" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="2" Initialized="ViewportHost_OnInitialized" />
             </Grid>
+        </Grid>
+        <Grid Name="GridProcessingOverlay" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="White" Opacity="0.6" Visibility="Hidden">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <m:ProgressRing/>
+                <TextBlock Name="TextProcessingMessage" FontSize="20" Margin="0,30" />
+            </StackPanel>
         </Grid>
     </Grid>
 </m:MetroWindow>

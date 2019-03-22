@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:m="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-        xmlns:s="clr-namespace:Sparta;assembly=WarpLib"
+        xmlns:s="clr-namespace:Sparta;assembly=WarpControls"
         xmlns:local="clr-namespace:Cube"
         mc:Ignorable="d"
         Title="Import Coordinates" Height="140" Width="400" WindowStartupLocation="CenterOwner" BorderThickness="0.5" BorderBrush="{DynamicResource AccentColorBrush}">
@@ -62,9 +62,9 @@
     </Window.Resources>
     <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="10">
         <StackPanel Orientation="Horizontal">
-            <s:ValueSlider TextFormat="Imported coordiantes were picked in a {0}" Value="{Binding ImportVolumeWidth, Mode=TwoWay}" UpdateTrigger="PropertyChanged" MinValue="2" MaxValue="99999" StepSize="1" />
-            <s:ValueSlider TextFormat=" x {0}" Value="{Binding ImportVolumeHeight, Mode=TwoWay}" UpdateTrigger="PropertyChanged" MinValue="2" MaxValue="99999" StepSize="1" />
-            <s:ValueSlider TextFormat=" x {0} px volume." Value="{Binding ImportVolumeDepth, Mode=TwoWay}" UpdateTrigger="PropertyChanged" MinValue="2" MaxValue="99999" StepSize="1" />
+            <s:ValueSlider TextFormat="Imported coordiantes were picked in a {0}" Value="{Binding ImportVolumeWidth, Mode=TwoWay}" UpdateTrigger="PropertyChanged" MinValue="1" MaxValue="99999" StepSize="1" />
+            <s:ValueSlider TextFormat=" x {0}" Value="{Binding ImportVolumeHeight, Mode=TwoWay}" UpdateTrigger="PropertyChanged" MinValue="1" MaxValue="99999" StepSize="1" />
+            <s:ValueSlider TextFormat=" x {0} px volume." Value="{Binding ImportVolumeDepth, Mode=TwoWay}" UpdateTrigger="PropertyChanged" MinValue="1" MaxValue="99999" StepSize="1" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
             <CheckBox Content="Invert X" IsChecked="{Binding ImportInvertX, Mode=TwoWay}" />

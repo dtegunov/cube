@@ -7,7 +7,7 @@ using Warp.Tools;
 
 namespace Cube
 {
-    public class Options : DataBase
+    public class Options : WarpBase
     {
         private string _PathTomogram = "";
         public string PathTomogram
@@ -294,6 +294,20 @@ namespace Cube
         {
             get { return _ExportInvertZ; }
             set { if (value != _ExportInvertZ) { _ExportInvertZ = value; OnPropertyChanged(); } }
+        }
+
+        private decimal _ParticleScoreMin = 0;
+        public decimal ParticleScoreMin
+        {
+            get { return _ParticleScoreMin; }
+            set { if (value != _ParticleScoreMin) { _ParticleScoreMin = value; OnPropertyChanged(); } }
+        }
+
+        private decimal _ParticleScoreMax = 1;
+        public decimal ParticleScoreMax
+        {
+            get { return _ParticleScoreMax; }
+            set { if (value != _ParticleScoreMax) { _ParticleScoreMax = value; OnPropertyChanged(); } }
         }
 
         public void Save(string path)
