@@ -3,7 +3,7 @@
 # Cube – making sub-tomogram picking suck slightly less.
 
 ## You will need
-- [Precompiled binaries](https://www.dropbox.com/s/ing340k49w9is7d/Cube.zip?dl=0) (compiling the code yourself will likely fail because I don't synchronize updates for all dependencies)
+- [Precompiled binaries](https://www.dropbox.com/s/ing340k49w9is7d/Cube.zip?dl=1) (compiling the code yourself will likely fail because I don't synchronize updates for all dependencies)
 - Windows PC with a GPU that supports OpenGL 4.4, the latest drivers and [.NET Framework 4.7](https://dotnet.microsoft.com/download/dotnet-framework) installed.
 - Tomographic volume in MRC format.
 - Optionally, particle coordinates either as a tab-delimited text file (XYZ columns), or a STAR file using Relion's column names (i. e. rlnCoordinateX etc.).
